@@ -1,6 +1,4 @@
-const express = require('express')
-const api = require('./api')
-const middleware = require('./middleware')
+@@ -4,13 +4,9 @@ const middleware = require('./middleware')
 const bodyParser = require('body-parser')
 
 
@@ -14,11 +12,15 @@ app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json())
 app.use(middleware.cors)
 app.get('/', api.handleRoot)
-app.get('/products', api.listProducts)
-app.get('/products/:id', api.getProduct)
+@@ -19,6 +15,9 @@ app.get('/products/:id', api.getProduct)
 app.put('/products/:id', api.editProduct)
 app.delete('/products/:id', api.deleteProduct)
 app.post('/products', api.createProduct)
 // Boot the server
 app.listen(port, () => console.log(`Server listening on port ${port}`))
 
+app.get('/orders', api.listOrders)
+app.get('/orders/', api.createOrder)
+app.get('/orders/', api.editOrder)
+app.get('/orders/', api.deleteOrder)
+app.listen(port, () => console.log(`Server listening on port ${port}`))
