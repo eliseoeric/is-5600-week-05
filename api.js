@@ -11,6 +11,7 @@ function handleRoot(req, res) {
   res.sendFile(path.join(__dirname, '/index.html'));
 }
 
+
 /**
  * List all products
  * @param {object} req
@@ -49,10 +50,11 @@ async function getProduct(req, res, next) {
  * @param {object} req 
  * @param {object} res 
  */
-async function createProduct(req, res) {
-  console.log('request body:', req.body)
-  res.json(req.body)
+async function createProduct(req, res, next) {
+  const product = await Products.create(req.body)
+  res.json(product)
 }
+
 
 /**
  * Edit a product
