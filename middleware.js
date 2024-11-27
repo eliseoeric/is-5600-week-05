@@ -28,7 +28,7 @@ function handleError(err, req, res, next) {
   // Log the error to our server's console
   console.error(err)
 
-  // If the response has already been sent, we can't send another response
+  // If the response has already been sent, we will not send another response
   if (res.headersSent) {
     return next(err)
   }
