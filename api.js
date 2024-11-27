@@ -47,11 +47,12 @@ async function getProduct(req, res, next) {
 /**
  * Create a product
  * @param {object} req 
- * @param {object} res 
+ * @param {object} res  
+ * @param {NextFunction} next
  */
-async function createProduct(req, res) {
-  console.log('request body:', req.body)
-  res.json(req.body)
+async function createProduct(req, res,next) {
+ const product = await Products.create(req.body)
+  res.json(product)
 }
 
 /**
@@ -61,7 +62,8 @@ async function createProduct(req, res) {
  * @param {function} next
  */
 async function editProduct(req, res, next) {
-  console.log(req.body)
+  const change = req.body
+  const product = await Products.edit(req.params.id, change)
   res.json(req.body)
 }
 
@@ -72,7 +74,57 @@ async function editProduct(req, res, next) {
  * @param {*} next 
  */
 async function deleteProduct(req, res, next) {
+  const response = await Products.destroy(req.params.id)
   res.json({ success: true })
+}
+/**
+ * Create an order
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ */
+async function createOrder (req, res, next) {
+  const order = await Orders.create(req.body)
+  res.json(orders)
+}
+
+/**
+ * List orders
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ */
+async function listOrders (req, res, next) {
+  const { offset = 0, limit = 25, productId, status } = req.query
+
+  const orders = await Orders.list({ 
+    offset: Number(offset), 
+    limit: Number(limit),
+    productId, 
+    status 
+  })
+
+  res.json(orders)
+}
+/**
+ * edit an order
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ */
+async function editOrder (req, res, next) {
+  const order = await Orders.edit(req.body)
+  res.json(orders)
+}
+/**
+ * delete an order
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ */
+async function deleteOrder (req, res, next) {
+  const order = await Orders.destroy(req.body)
+  res.json(order)
 }
 
 module.exports = autoCatch({
@@ -81,5 +133,9 @@ module.exports = autoCatch({
   getProduct,
   createProduct,
   editProduct,
-  deleteProduct
+  deleteProduct,
+  listOrders,
+  createOrder,
+  editOrder,
+  deleteOrder
 });
