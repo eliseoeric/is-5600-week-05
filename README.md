@@ -1,4 +1,4 @@
-# Lab 05 | Fullstack Prints Part 2
+ # Lab 05 | Fullstack Prints Part 2
 
 ## Table of Contents
 
