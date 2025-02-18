@@ -38,7 +38,7 @@ function handleError(err, req, res, next) {
 }
 
 /**
- * Send a 404 response if no route is found
+ * Send a 404 response if no route is matched
  * @param {object} req
  * @param {object} res
  */
