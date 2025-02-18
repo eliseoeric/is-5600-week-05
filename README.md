@@ -262,7 +262,7 @@ So let's begin by registering the `orders` routes with the express server. Open 
 // ...
 
 app.get('/orders', api.listOrders)
-app.get('/orders/', api.createOrder)
+app.post('/orders/', api.createOrder)
 ```
 
 Then open up the `api.js` file and register the following route handlers.
