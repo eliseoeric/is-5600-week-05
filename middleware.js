@@ -17,6 +17,8 @@ function cors(req, res, next) {
   next()
 }
 
+
+
 /**
  * Handle errors
  * @param {object} err
