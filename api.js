@@ -45,13 +45,14 @@ async function getProduct(req, res, next) {
 }
 
 /**
- * Create a product
- * @param {object} req 
- * @param {object} res 
+ * Create a new product
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
-async function createProduct(req, res) {
-  console.log('request body:', req.body)
-  res.json(req.body)
+async function createProduct (req, res, next) {
+  const product = await Products.create(req.body)
+  res.json(product)
 }
 
 /**
