@@ -1,6 +1,7 @@
 const path = require('path')
 const Products = require('./products')
 const autoCatch = require('./lib/auto-catch')
+const Orders = require('./orders')
 
 /**
  * Handle the root route
@@ -49,9 +50,9 @@ async function getProduct(req, res, next) {
  * @param {object} req 
  * @param {object} res 
  */
-async function createProduct(req, res) {
-  console.log('request body:', req.body)
-  res.json(req.body)
+async function createProduct (req, res, next) {
+  const product = await Products.create(req.body)
+  res.json(product)
 }
 
 /**
@@ -75,11 +76,75 @@ async function deleteProduct(req, res, next) {
   res.json({ success: true })
 }
 
+
+/**
+ * Update a product
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ */
+async function editProduct (req, res, next) {
+  const change = req.body
+  const product = await Products.edit(req.params.id, change)
+  res.json(product)
+}
+
+/**
+ * Delete a product
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ */
+async function deleteProduct (req, res, next) {
+  const response = await Products.destroy(req.params.id)
+  res.json(response)
+}
+
+async function createOrder (req, res, next) {
+  const order = await Orders.create(req.body)
+  res.json(order)
+}
+
+async function listOrders (req, res, next) {
+  const { offset = 0, limit = 25, productId, status } = req.query
+
+  const orders = await Orders.list({ 
+    offset: Number(offset), 
+    limit: Number(limit),
+    productId, 
+    status 
+  })
+
+  res.json(orders)
+}
+
+async function editOrder(req, res, next) {
+  try {
+    const updatedOrder = await Orders.edit(req.params.id, req.body);
+    res.json(updatedOrder);
+  } catch (error) {
+    res.status(404).json({ error: error.message });
+  }
+}
+
+async function deleteOrder(req, res, next) {
+  try {
+    await Orders.destroy(req.params.id);
+    res.status(204).send(); // No content response
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = autoCatch({
   handleRoot,
   listProducts,
   getProduct,
   createProduct,
   editProduct,
-  deleteProduct
+  deleteProduct,
+  createOrder,
+  listOrders,
+  editOrder,
+  deleteOrder
 });
