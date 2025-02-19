@@ -1,11 +1,10 @@
-const fs = require('fs').promises;
-const path = require('path');
-const cuid = require('cuid');
-const db = require('./db');
+const fs = require('fs').promises
+const path = require('path')
+const cuid = require('cuid')
+const db = require('./db')
+const { title } = require('process')
 
-const productsFile = path.join(__dirname, 'data/full-products.json');
-
-// Define our Product Model
+const productsFile = path.join(__dirname, 'data/full-products.json')
 const Product = db.model('Product', {
   _id: { type: String, default: cuid },
   description: { type: String },
@@ -30,106 +29,66 @@ const Product = db.model('Product', {
   tags: [{
     title: { type: String, required: true },
   }], 
-});
+})
 
 /**
  * List products
  * @param {*} options 
  * @returns 
- * @param {Object} query
- * @returns {Promise<Object[]>}
  */
 async function list(options = {}) {
+
   const { offset = 0, limit = 25, tag } = options;
-
-  // Read the product data
-  const data = await fs.readFile(productsFile);
-  const products = JSON.parse(data)
-    .filter(product => {
-      // If no tag is provided, return the product
-      if (!tag) {
-        return product;
-      }
-
-      // Filter products by tag
-      return product.tags.find(({ title }) => title === tag);
-    })
-    .slice(offset, offset + limit); // Slice the products
-
-  // Use Mongoose to query the database if a tag is provided
   const query = tag ? {
     tags: {
       $elemMatch: {
         title: tag
       }
     }
-  } : {};
-
-  // Fetch from the database
-  const dbProducts = await Product.find(query)
-    .sort({ _id: 1 })
+  } : {}
+  
+  const products= await Product.find(query)
+    .sort(({_id:1}))
     .skip(offset)
-    .limit(limit);
+    .limit(limit)
 
-  return dbProducts.length > 0 ? dbProducts : products;
+    return products
+  
 }
 
 /**
- * Get a product
- * @param {String} _id
- * @returns {Promise<Object>}
+ * Get a single product
+ * @param {string} id
+ * @returns {Promise<object>}
  */
 async function get(_id) {
-  const product = await Product.findById(_id);
-  return product;
+  const product = await Product.findById(_id)
+  return product
+}
+async function create (fields){
+  const product = await new Product(fields).save()
+  return product
 }
 
-/**
- * Create a new product
- * @param {Object} fields
- * @returns {Promise<Object>}
- */
-async function create(fields) {
-  const product = await new Product(fields).save();
-  return product;
-}
+async function edit (_id,change){
+  const product=await get(_id)
+  Object.keys(change).forEach(function(key){
+    product[key] =change[key]
 
-/**
- * Edit a product
- * @param {String} _id
- * @param {Object} change
- * @returns {Promise<Object>}
- */
-async function edit(_id, change) {
-  const product = await get(_id);
+  })
+  //Object.assign(product,{ ...change});
 
-  // If no product is found, return null
-  if (!product) {
-    return null;
-  }
+  await product.save()
+  return product
+ }
 
-  // Update product fields
-  Object.keys(change).forEach(function (key) {
-    product[key] = change[key];
-  });
-
-  await product.save();
-  return product;
-}
-
-/**
- * Delete a product
- * @param {String} _id
- * @returns {Promise<Object>}
- */
-async function destroy(_id) {
-  return await Product.deleteOne({ _id });
-}
-
+ async function destroy(_id){
+  return await Product.deleteOne({_id})
+ }
 module.exports = {
   list,
   get,
   create,
   edit,
   destroy
-};
+}
