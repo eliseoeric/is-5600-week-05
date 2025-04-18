@@ -1,0 +1,20 @@
+[
+  {
+    "title": "Beautiful Landscape Print",
+    "price": 29.99,
+    "description": "A beautiful print of a mountain landscape.",
+    "image": "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/thumbnails/image/wyoming-scenery-wallpaper-2.jpg"
+  },
+  {
+    "title": "Abstract Art Poster",
+    "price": 19.99,
+    "description": "A vibrant abstract art poster for your wall.",
+    "image": "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/thumbnails/image/wyoming-scenery-wallpaper-2.jpg"
+  },
+  {
+    "title": "Vintage Movie Poster",
+    "price": 14.99,
+    "description": "A classic vintage movie poster from the 80s.",
+    "image": "https://d9-wret.s3.us-west-2.amazonaws.com/assets/palladium/production/s3fs-public/thumbnails/image/wyoming-scenery-wallpaper-2.jpg"
+  }
+]
