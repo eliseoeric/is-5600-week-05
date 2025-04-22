@@ -93,7 +93,6 @@ async function destroy (_id) {
   return await Product.deleteOne({_id})
 }
 
-
 module.exports = {
   list,
   get,

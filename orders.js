@@ -102,7 +102,6 @@ async function edit(_id, change) {
   async function destroy(_id) {
     await Order.deleteOne({ _id })
   }
-
 module.exports = autoCatch({
     create,
     get,
