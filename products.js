@@ -2,11 +2,13 @@ const fs = require('fs').promises
 const path = require('path')
 
 const productsFile = path.join(__dirname, 'data/full-products.json')
+const Product = require('./models/Product');
 
 /**
  * List products
  * @param {*} options 
  * @returns 
+ * @returns {Promise<Array>}
  */
 async function list(options = {}) {
 
@@ -18,16 +20,24 @@ async function list(options = {}) {
       if (!tag) {
         return product
       }
+  const query = tag ? { tags: tag } : {};
+
+  const products = await Product.find(query)
+    .skip(offset)
+    .limit(limit)
+    .exec();
 
       return product.tags.find(({ title }) => title == tag)
     })
     .slice(offset, offset + limit) // Slice the products
+  return products;
 }
 
 /**
  * Get a single product
  * @param {string} id
  * @returns {Promise<object>}
+ * @returns {Promise<object|null>}
  */
 async function get(id) {
   const products = JSON.parse(await fs.readFile(productsFile))
@@ -41,9 +51,11 @@ async function get(id) {
 
   // If no product is found, return null
   return null;
+  return await Product.findById(id);
 }
 
 module.exports = {
   list,
   get
 }
+};
