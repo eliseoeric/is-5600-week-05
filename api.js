@@ -1,85 +1,59 @@
-const path = require('path')
-const Products = require('./products')
-const autoCatch = require('./lib/auto-catch')
+const express = require('express');
+const Product = require('./models/Product');
+const Order = require('./models/Order');
+const orderService = require('./order');
+
+const router = express.Router();
 
 /**
- * Handle the root route
- * @param {object} req
- * @param {object} res
-*/
-function handleRoot(req, res) {
-  res.sendFile(path.join(__dirname, '/index.html'));
-}
-
-/**
- * List all products
- * @param {object} req
- * @param {object} res
+ * GET /api/products
  */
-async function listProducts(req, res) {
-  // Extract the limit and offset query parameters
-  const { offset = 0, limit = 25, tag } = req.query
-  // Pass the limit and offset to the Products service
-  res.json(await Products.list({
-    offset: Number(offset),
-    limit: Number(limit),
-    tag
-  }))
-}
-
-
-/**
- * Get a single product
- * @param {object} req
- * @param {object} res
- */
-async function getProduct(req, res, next) {
-  const { id } = req.params
-
-  const product = await Products.get(id)
-  if (!product) {
-    return next()
+router.get('/products', async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch products' });
   }
-
-  return res.json(product)
-}
-
-/**
- * Create a product
- * @param {object} req 
- * @param {object} res 
- */
-async function createProduct(req, res) {
-  console.log('request body:', req.body)
-  res.json(req.body)
-}
-
-/**
- * Edit a product
- * @param {object} req
- * @param {object} res
- * @param {function} next
- */
-async function editProduct(req, res, next) {
-  console.log(req.body)
-  res.json(req.body)
-}
-
-/**
- * Delete a product
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
- */
-async function deleteProduct(req, res, next) {
-  res.json({ success: true })
-}
-
-module.exports = autoCatch({
-  handleRoot,
-  listProducts,
-  getProduct,
-  createProduct,
-  editProduct,
-  deleteProduct
 });
+
+/**
+ * POST /api/products
+ */
+router.post('/products', async (req, res) => {
+  try {
+    const { title, price, tags } = req.body;
+    const product = new Product({ title, price, tags });
+    const saved = await product.save();
+    res.status(201).json(saved);
+  } catch (err) {
+    res.status(400).json({ error: 'Failed to create product' });
+  }
+});
+
+/**
+ * GET /api/orders
+ */
+router.get('/orders', async (req, res) => {
+  try {
+    const orders = await orderService.list();
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+});
+
+/**
+ * POST /api/orders
+ */
+router.post('/orders', async (req, res) => {
+  try {
+    const { productIds } = req.body;
+    const order = await orderService.create(productIds);
+    res.status(201).json(order);
+  } catch (err) {
+    res.status(400).json({ error: 'Failed to create order' });
+  }
+});
+
+module.exports = router;
