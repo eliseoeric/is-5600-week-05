@@ -1,6 +1,7 @@
 const path = require('path')
 const Products = require('./products')
 const autoCatch = require('./lib/auto-catch')
+const Orders = ('./orders')
 
 /**
  * Handle the root route

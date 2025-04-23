@@ -1,5 +1,7 @@
 const fs = require('fs').promises
 const path = require('path')
+const cuid = require('cuid')
+const db = require('./db')
 
 const productsFile = path.join(__dirname, 'data/full-products.json')
 
