@@ -1,85 +1,127 @@
-const path = require('path')
-const Products = require('./products')
-const autoCatch = require('./lib/auto-catch')
+const express = require('express');
+const products = require('./products'); // Mongo logic
+const orders = require('./orders');    // Mongo logic
 
-/**
- * Handle the root route
- * @param {object} req
- * @param {object} res
-*/
+const router = express.Router();
+
+// ─── ROOT ────────────────────────────────────────────────
+
 function handleRoot(req, res) {
-  res.sendFile(path.join(__dirname, '/index.html'));
+  res.send('✅ Fullstack Prints API is up!');
 }
 
-/**
- * List all products
- * @param {object} req
- * @param {object} res
- */
+// ─── PRODUCTS ────────────────────────────────────────────
+
 async function listProducts(req, res) {
-  // Extract the limit and offset query parameters
-  const { offset = 0, limit = 25, tag } = req.query
-  // Pass the limit and offset to the Products service
-  res.json(await Products.list({
-    offset: Number(offset),
-    limit: Number(limit),
-    tag
-  }))
-}
-
-
-/**
- * Get a single product
- * @param {object} req
- * @param {object} res
- */
-async function getProduct(req, res, next) {
-  const { id } = req.params
-
-  const product = await Products.get(id)
-  if (!product) {
-    return next()
+  try {
+    const list = await products.list(req.query);
+    res.json(list);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to list products' });
   }
-
-  return res.json(product)
 }
 
-/**
- * Create a product
- * @param {object} req 
- * @param {object} res 
- */
+async function getProduct(req, res) {
+  try {
+    const product = await products.get(req.params.id);
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to get product' });
+  }
+}
+
 async function createProduct(req, res) {
-  console.log('request body:', req.body)
-  res.json(req.body)
+  try {
+    const created = await products.create(req.body);
+    res.status(201).json(created);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: 'Failed to create product' });
+  }
 }
 
-/**
- * Edit a product
- * @param {object} req
- * @param {object} res
- * @param {function} next
- */
-async function editProduct(req, res, next) {
-  console.log(req.body)
-  res.json(req.body)
+async function editProduct(req, res) {
+  try {
+    const updated = await products.edit(req.params.id, req.body);
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: 'Failed to update product' });
+  }
 }
 
-/**
- * Delete a product
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
- */
-async function deleteProduct(req, res, next) {
-  res.json({ success: true })
+async function deleteProduct(req, res) {
+  try {
+    await products.destroy(req.params.id);
+    res.json({ deleted: true });
+  } catch (err) {
+    res.status(400).json({ error: 'Failed to delete product' });
+  }
 }
 
-module.exports = autoCatch({
+// ─── ORDERS ──────────────────────────────────────────────
+
+async function listOrders(req, res) {
+  try {
+    const list = await orders.list(req.query);
+    res.json(list);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to list orders' });
+  }
+}
+
+async function getOrder(req, res) {
+  try {
+    const order = await orders.get(req.params.id);
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to get order' });
+  }
+}
+
+async function createOrder(req, res) {
+  try {
+    const created = await orders.create(req.body);
+    res.status(201).json(created);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: 'Failed to create order' });
+  }
+}
+
+async function editOrder(req, res) {
+  try {
+    const updated = await orders.edit(req.params.id, req.body);
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: 'Failed to update order' });
+  }
+}
+
+async function deleteOrder(req, res) {
+  try {
+    await orders.destroy(req.params.id);
+    res.json({ deleted: true });
+  } catch (err) {
+    res.status(400).json({ error: 'Failed to delete order' });
+  }
+}
+
+// ─── EXPORT HANDLERS FOR USE IN app.js ───────────────────
+
+module.exports = {
   handleRoot,
   listProducts,
   getProduct,
   createProduct,
   editProduct,
-  deleteProduct
-});
+  deleteProduct,
+  listOrders,
+  getOrder,
+  createOrder,
+  editOrder,
+  deleteOrder
+};
