@@ -1,24 +1,15 @@
-const express = require('express')
-const api = require('./api')
-const middleware = require('./middleware')
-const bodyParser = require('body-parser')
+const mongoose = require('mongoose')
 
+/**
+ * In this example we are connecting to a local MongoDB instance. This instance is running via docker-compose in our GitHub Codespaces environment.
+ * In a real-world application, you would want to use a cloud-based MongoDB service like MongoDB Atlas.
+ */
+mongoose.connect(
+  process.env.MONGODB_URI || 'mongodb://root:example@localhost:27017/?authSource=admin',
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  }
+)
 
-// Set the port
-const port = process.env.PORT || 3000
-// Boot the app
-const app = express()
-// Register the public directory
-app.use(express.static(__dirname + '/public'));
-// register the routes
-app.use(bodyParser.json())
-app.use(middleware.cors)
-app.get('/', api.handleRoot)
-app.get('/products', api.listProducts)
-app.get('/products/:id', api.getProduct)
-app.put('/products/:id', api.editProduct)
-app.delete('/products/:id', api.deleteProduct)
-app.post('/products', api.createProduct)
-// Boot the server
-app.listen(port, () => console.log(`Server listening on port ${port}`))
-
+module.exports = mongoose

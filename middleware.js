@@ -1,53 +1,94 @@
-/**
- * Set the CORS headers on the response object
- * @param {object} req
- * @param {object} res
- * @param {function} next
- */
-function cors(req, res, next) {
-  const origin = req.headers.origin
+const cuid = require('cuid')
 
-  // Set the CORS headers
-  res.setHeader('Access-Control-Allow-Origin', origin || '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS, XMODIFY')
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Max-Age', '86400')
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept')
+const db = require('./db')
 
-  next()
-}
+const Order = db.model('Order', {
+  _id: { type: String, default: cuid },
+  buyerEmail: { type: String, required: true },
+  products: [{
+    type: String,
+    ref: 'Product', // ref will automatically fetch associated products for us
+    index: true,
+    required: true
+  }],
+  status: {
+    type: String,
+    index: true,
+    default: 'CREATED',
+    enum: ['CREATED', 'PENDING', 'COMPLETED']
+  }
+})
 
-/**
- * Handle errors
- * @param {object} err
- * @param {object} req
- * @param {object} res
- * @param {function} next
- */
-function handleError(err, req, res, next) {
-  // Log the error to our server's console
-  console.error(err)
 
-  // If the response has already been sent, we can't send another response
-  if (res.headersSent) {
-    return next(err)
+async function list(options = {}) {
+
+  const { offset = 0, limit = 25, productId, status } = options;
+
+  const productQuery = productId ? {
+    products: productId
+  } : {}
+
+  const statusQuery = status ? {
+    status: status
+  } : {}
+
+  const query = {
+    ...productQuery,
+    ...statusQuery
   }
 
-  // Send a 500 error response
-  res.status(500).json({ error: "Internal Error Occurred" })
+  const orders = await Order.find(query)
+    .sort({ _id: 1 })
+    .skip(offset)
+    .limit(limit)
+
+  return orders
 }
 
-/**
- * Send a 404 response if no route is found
- * @param {object} req
- * @param {object} res
- */
-function notFound(req, res) {
-  res.status(404).json({ error: "Not Found" })
+
+async function get (_id) {
+  const order = await Order.findById(_id)
+    .populate('products')
+    .exec()
+  
+  return order
 }
 
+
+async function create (fields) {
+  const order = await new Order(fields).save()
+  await order.populate('products')
+  return order
+}
+
+async function edit(_id, changes) {
+    const updatedOrder = await Order.findByIdAndUpdate(
+      _id,
+      changes,
+      { new: true } // Ensures the returned document is the updated one
+    )
+      .populate('products') // Populates the `products` field with associated data
+      .exec();
+  
+    if (!updatedOrder) {
+      throw new Error(`Order with id ${_id} not found`);
+    }
+  
+    return updatedOrder;
+  }
+  
+  async function destroy(_id) {
+    const deletedOrder = await Order.findByIdAndDelete(_id).exec();
+  
+    if (!deletedOrder) {
+      throw new Error(`Order with id ${_id} not found`);
+    }
+  }
+  
 module.exports = {
-  cors,
-  handleError,
-  notFound
+    create,
+    get,
+    list,
+    edit,
+    destroy
 }
