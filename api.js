@@ -50,8 +50,8 @@ async function getProduct(req, res, next) {
  * @param {object} res 
  */
 async function createProduct(req, res) {
-  console.log('request body:', req.body)
-  res.json(req.body)
+  const product = await Products.create(req.body)
+  res.json(product)
 }
 
 /**
