@@ -1,24 +1,32 @@
-const express = require('express')
-const api = require('./api')
-const middleware = require('./middleware')
-const bodyParser = require('body-parser')
+const path = require("path")
+const express = require("express")
+const bodyParser = require("body-parser")
+const api = require("./api")
+const middleware = require("./middleware")
 
-
-// Set the port
-const port = process.env.PORT || 3000
-// Boot the app
 const app = express()
-// Register the public directory
-app.use(express.static(__dirname + '/public'));
-// register the routes
+const port = process.env.PORT || 3000
+
+app.use(express.static(__dirname + "/public"))
 app.use(bodyParser.json())
 app.use(middleware.cors)
-app.get('/', api.handleRoot)
-app.get('/products', api.listProducts)
-app.get('/products/:id', api.getProduct)
-app.put('/products/:id', api.editProduct)
-app.delete('/products/:id', api.deleteProduct)
-app.post('/products', api.createProduct)
-// Boot the server
-app.listen(port, () => console.log(`Server listening on port ${port}`))
 
+/* PRODUCT ROUTES */
+app.get("/", api.handleRoot)
+app.get("/products", api.listProducts)
+app.get("/products/:id", api.getProduct)
+app.post("/products", api.createProduct)
+app.put("/products/:id", api.editProduct)
+app.delete("/products/:id", api.deleteProduct)
+
+/* ORDER ROUTES */
+app.get("/orders", api.listOrders)
+app.get("/orders/:id", api.getOrder)
+app.post("/orders", api.createOrder)
+app.put("/orders/:id", api.editOrder)
+app.delete("/orders/:id", api.deleteOrder)
+
+app.use(middleware.notFound)
+app.use(middleware.handleError)
+
+app.listen(port, () => console.log(`Server listening on port ${port}`))
