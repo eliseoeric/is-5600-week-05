@@ -1,24 +1,39 @@
-const express = require('express')
-const api = require('./api')
-const middleware = require('./middleware')
-const bodyParser = require('body-parser')
+// app.js
+require('dotenv').config();
+const express = require('express');
+const morgan = require('morgan');
+const helmet = require('helmet');
+const cors = require('cors');
+const api = require('./api');
+const db = require('./db');
 
+const app = express();
 
-// Set the port
-const port = process.env.PORT || 3000
-// Boot the app
-const app = express()
-// Register the public directory
-app.use(express.static(__dirname + '/public'));
-// register the routes
-app.use(bodyParser.json())
-app.use(middleware.cors)
-app.get('/', api.handleRoot)
-app.get('/products', api.listProducts)
-app.get('/products/:id', api.getProduct)
-app.put('/products/:id', api.editProduct)
-app.delete('/products/:id', api.deleteProduct)
-app.post('/products', api.createProduct)
-// Boot the server
-app.listen(port, () => console.log(`Server listening on port ${port}`))
+// middleware
+app.use(helmet());
+app.use(morgan('dev'));
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// routes
+app.use('/api', api);
+
+// basic health
+app.get('/', (req, res) => res.send('is-5600-week-05 - products service'));
+
+// error handler
+app.use((err, req, res, next) => {
+  console.error(err);
+    res.status(500).json({ error: err.message || 'Internal Server Error' });
+    });
+
+    const PORT = process.env.PORT || 3000;
+
+    db.connect().then(() => {
+      app.listen(PORT, '0.0.0.0', () => {
+          console.log(`Server listening on port ${PORT}`);
+            });
+            }).catch(err => {
+              console.error('Failed to start server due to DB error:', err);
+              });
