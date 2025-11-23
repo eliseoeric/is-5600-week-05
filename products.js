@@ -1,49 +1,37 @@
-const fs = require('fs').promises
-const path = require('path')
+const cuid = require('cuid');
+const db = require('./db');
 
-const productsFile = path.join(__dirname, 'data/full-products.json')
+const Product = db.model('Product', {
+  _id: { type: String, default: cuid },
+  description: String,
+  alt_description: String,
+  likes: Number,
+  urls: Object,
+  links: Object,
+  user: Object,
+  tags: Array
+});
 
-/**
- * List products
- * @param {*} options 
- * @returns 
- */
 async function list(options = {}) {
-
   const { offset = 0, limit = 25, tag } = options;
-
-  const data = await fs.readFile(productsFile)
-  return JSON.parse(data)
-    .filter(product => {
-      if (!tag) {
-        return product
-      }
-
-      return product.tags.find(({ title }) => title == tag)
-    })
-    .slice(offset, offset + limit) // Slice the products
+  const query = tag ? { "tags.title": tag } : {};
+  return Product.find(query).skip(offset).limit(limit);
 }
 
-/**
- * Get a single product
- * @param {string} id
- * @returns {Promise<object>}
- */
 async function get(id) {
-  const products = JSON.parse(await fs.readFile(productsFile))
-
-  // Loop through the products and return the product with the matching id
-  for (let i = 0; i < products.length; i++) {
-    if (products[i].id === id) {
-      return products[i]
-    }
-  }
-
-  // If no product is found, return null
-  return null;
+  return Product.findById(id);
 }
 
-module.exports = {
-  list,
-  get
+async function create(fields) {
+  return Product.create(fields);
 }
+
+async function edit(id, change) {
+  return Product.findByIdAndUpdate(id, change, { new: true });
+}
+
+async function destroy(id) {
+  return Product.deleteOne({ _id: id });
+}
+
+module.exports = { list, get, create, edit, destroy };
