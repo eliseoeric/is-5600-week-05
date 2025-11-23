@@ -1,49 +1,32 @@
-const fs = require('fs').promises
-const path = require('path')
+const mongoose = require("mongoose");
+const cuid = require("cuid");
 
-const productsFile = path.join(__dirname, 'data/full-products.json')
+const ProductSchema = new mongoose.Schema({
+  _id: { type: String, default: cuid },
+  name: String,
+  description: String,
+  price: Number,
+  image: String,
+});
 
-/**
- * List products
- * @param {*} options 
- * @returns 
- */
-async function list(options = {}) {
+const Product = mongoose.model("Product", ProductSchema);
 
-  const { offset = 0, limit = 25, tag } = options;
+exports.list = async function () {
+  return await Product.find();
+};
 
-  const data = await fs.readFile(productsFile)
-  return JSON.parse(data)
-    .filter(product => {
-      if (!tag) {
-        return product
-      }
+exports.get = async function (id) {
+  return await Product.findById(id);
+};
 
-      return product.tags.find(({ title }) => title == tag)
-    })
-    .slice(offset, offset + limit) // Slice the products
-}
+exports.create = async function (fields) {
+  return await Product.create(fields);
+};
 
-/**
- * Get a single product
- * @param {string} id
- * @returns {Promise<object>}
- */
-async function get(id) {
-  const products = JSON.parse(await fs.readFile(productsFile))
+exports.edit = async function (id, fields) {
+  return await Product.findByIdAndUpdate(id, fields, { new: true });
+};
 
-  // Loop through the products and return the product with the matching id
-  for (let i = 0; i < products.length; i++) {
-    if (products[i].id === id) {
-      return products[i]
-    }
-  }
-
-  // If no product is found, return null
-  return null;
-}
-
-module.exports = {
-  list,
-  get
-}
+exports.destroy = async function (id) {
+  return await Product.findByIdAndDelete(id);
+};
