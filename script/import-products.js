@@ -1,11 +1,17 @@
-const db = require('../db');
-const Products = require('../products');
+// script/import-products.js
+const fs = require('fs')
+const Products = require('../products')
 
-const products = require('../data/full-products.json');
+async function run() {
+  const raw = fs.readFileSync('./data/full-products.json', 'utf8')
+  const items = JSON.parse(raw)
 
-;(async () => {
-  // loop over the products and create them
-  for (let i = 0; i < products.length; i++) {
-    console.log( await Products.create(products[i]));
+  for (const item of items) {
+    await Products.create(item)
   }
-})()
+
+  console.log(`Imported ${items.length} products`)
+  process.exit()
+}
+
+run()
