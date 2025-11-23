@@ -64,7 +64,7 @@ async function list(options = {}) {
  * @returns {Promise<object>}
  */
 async function get(id) {
-  const product = await Product.findById(_id)
+  const product = await Product.findById(id)
   return product
 }
 
@@ -100,8 +100,8 @@ async function edit(_id, change) {
   return product
 }
 
-async function destroy(_id) {
-  return await Product.deleteOne({ _id })
+async function destroy(id) {
+  return await Product.deleteOne({_id: id })
 }
 
 
