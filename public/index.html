@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Fullstack Prints</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root { font-family: system-ui, Arial, sans-serif; }
+      body { margin: 0; padding: 24px; }
+      h1 { margin: 0 0 16px; }
+      .toolbar { display:flex; gap:8px; align-items:center; margin-bottom:16px; }
+      .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+      .card { border:1px solid #e5e7eb; border-radius:10px; overflow:hidden; background:#fff; }
+      .thumb { width:100%; aspect-ratio: 4 / 3; object-fit: cover; display:block; }
+      .meta { padding:10px 12px; }
+      .muted { color:#6b7280; font-size:12px; }
+      button { padding:8px 12px; border:1px solid #111; background:#fff; cursor:pointer; border-radius:8px; }
+      button:hover { background:#111; color:#fff; }
+      input, select { padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; }
+      #status { margin-left:auto; color:#6b7280; font-size:12px; }
+    </style>
+  </head>
+  <body>
+    <h1>Products</h1>
+
+    <div class="toolbar">
+      <label>Tag:
+        <input id="tag" placeholder="e.g. texture" />
+      </label>
+      <label>Limit:
+        <select id="limit">
+          <option>10</option>
+          <option selected>12</option>
+          <option>20</option>
+          <option>25</option>
+        </select>
+      </label>
+      <button id="apply">Apply</button>
+      <button id="prev">Prev</button>
+      <button id="next">Next</button>
+      <span id="status"></span>
+    </div>
+
+    <div id="out" class="grid"></div>
+
+    <script src="/index.js"></script>
+  </body>
+</html>

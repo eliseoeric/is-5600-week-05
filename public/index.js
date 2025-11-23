@@ -1,87 +1,88 @@
-const html = window.nanohtml
+let offset = 0;
+let limit = 12;
+let tag = '';
 
-const offset = 0
-const limit = 10
-const tag = 'texture'
-listPrints({ offset, limit, tag })
-  .then(prints => render({ prints, offset, limit, tag }))
+const out = document.getElementById('out');
+const statusEl = document.getElementById('status');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const applyBtn = document.getElementById('apply');
+const tagInput = document.getElementById('tag');
+const limitSelect = document.getElementById('limit');
 
-function listPrints({ offset = 0, limit = 25, tag }) {
-  const endpoint = '/products'
-  const qs = `?offset=${offset}&limit=${limit}&tag=${tag || ''}`
-  return fetchJSON(endpoint + qs)
-}
+applyBtn.addEventListener('click', () => {
+  tag = tagInput.value.trim();
+  limit = Number(limitSelect.value);
+  offset = 0;
+  load();
+});
 
-function fetchJSON(url) {
-  return fetch(url).then(res => res.json())
-}
+prevBtn.addEventListener('click', () => {
+  if (offset <= 0) return;
+  offset = Math.max(0, offset - limit);
+  load();
+});
 
-function render({ prints, offset, limit, tag }) {
-  document.body.innerHTML = ''
-  document.body.appendChild(html`
-    <article>
-      <h2 class="f3 fw4 pa3 mv0">Prints</h2>
-      <div>${renderButtons({ offset, limit, tag })}</div>
-      <div class="cf pa2">
-        ${prints.map(renderPrint)}
-      </div>
-    </article>
-  `)
-}
+nextBtn.addEventListener('click', () => {
+  offset = offset + limit;
+  load();
+});
 
-function renderButtons({ offset, limit, tag }) {
-  return html`
-    <div class="flex items-center justify-center pa4">
-      ${renderPrev({ offset, limit, tag })}
-      ${renderNext({ offset, limit, tag })}
-    </div>
-  `
+async function load() {
+  statusEl.textContent = 'Loading...';
+  try {
+    const qs = new URLSearchParams({
+      offset: String(offset),
+      limit: String(limit),
+      ...(tag ? { tag } : {})
+    }).toString();
 
-  function renderPrev({ offset, limit, tag }) {
-    if (!offset) return
+    const res = await fetch(`/products?${qs}`);
+    if (!res.ok) {
+      const err = await safeJson(res);
+      throw new Error(err?.error || `HTTP ${res.status}`);
+    }
+    const items = await res.json();
 
-    offset = offset - limit
-    return html`
-      <a
-        href="#"
-        class="f5 no-underline black bg-animate hover-bg-black hover-white inline-flex items-center pa3 ba border-box mr4"
-        onclick=${() => listPrints({ offset, limit, tag }).then(prints => render({ prints, offset, limit, tag }))}
-        >
+    // If fewer than limit are returned, likely end of list—disable Next
+    prevBtn.disabled = offset <= 0;
+    nextBtn.disabled = items.length < limit;
 
-        <span class="pl1">Previous</span>
-      </a>
-    `
-  }
-
-  function renderNext({ offset, limit, tag }) {
-    offset = offset + limit
-    return html`
-    <a
-      href="#"
-      class="f5 no-underline black bg-animate hover-bg-black hover-white inline-flex items-center pa3 ba border-box"
-      onclick=${() => listPrints({ offset, limit, tag }).then(prints => render({ prints, offset, limit, tag }))}>
-      <span class="pr1">Next</span>
-    </a>
-    `
+    render(items);
+    statusEl.textContent = `offset=${offset}, limit=${limit}${tag ? `, tag=${tag}` : ''} — returned ${items.length}`;
+  } catch (e) {
+    console.error(e);
+    out.innerHTML = `<div class="card" style="padding:12px;color:#b91c1c;border-color:#fecaca;background:#fef2f2">
+      <strong>Error:</strong> ${e.message}
+    </div>`;
+    statusEl.textContent = 'Error';
   }
 }
 
-function renderPrint(print) {
-  console.log(print)
-  return html`
-    <div class="fl w-50 w-25-m w-20-l pa2">
-      <a href="${print.links.html}" target="_blank" class="db link dim tc">
-        <div style="background: url(${print.urls.thumb})" class="w-100 db outline black-10 h4 cover" alt="${print.alt_description}">
+function render(items) {
+  out.innerHTML = items.map(p => {
+    const title = Array.isArray(p.tags) ? p.tags.slice(0,3).map(t => t.title || t).join(', ') : (p.title || p.name || 'Untitled');
+    const artist = p.user ? `${p.user.first_name || ''} ${p.user.last_name || ''}`.trim() : '';
+    const img = p?.urls?.thumb || p?.urls?.small || '';
+    const link = p?.links?.html || '#';
+
+    return `
+      <div class="card">
+        ${img ? `<img class="thumb" src="${img}" alt="${p.alt_description || title}">` : ''}
+        <div class="meta">
+          <div><strong>${title}</strong></div>
+          ${artist ? `<div class="muted">${artist}</div>` : ''}
+          <div class="muted">${p._id || p.id || ''}</div>
+          ${link && link !== '#' ? `<div style="margin-top:6px"><a href="${link}" target="_blank">View</a></div>` : ''}
         </div>
-        <dl class="mt2 f6 lh-copy">
-          <dt class="clip">Title</dt>
-          <dd class="ml0 black truncate w-100">
-            ${print.tags.slice(0, 3).map(({ title }) => title).join(', ')}
-          </dd>
-          <dt class="clip">Artist</dt>
-          <dd class="ml0 gray truncate w-100">${print.user.first_name} ${print.user.last_name}</dd>
-        </dl>
-      </a>
-    </div>
-  `
+      </div>
+    `;
+  }).join('');
 }
+
+async function safeJson(res) {
+  try { return await res.json(); } catch { return null; }
+}
+
+// initial load
+load();
