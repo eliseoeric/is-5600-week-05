@@ -2,10 +2,15 @@ const express = require('express')
 const api = require('./api')
 const middleware = require('./middleware')
 const bodyParser = require('body-parser')
+const mongoose = require('mongoose');
 
 
 // Set the port
 const port = process.env.PORT || 3000
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/productsdb')
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.log(err));
 // Boot the app
 const app = express()
 // Register the public directory
