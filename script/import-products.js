@@ -1,11 +1,24 @@
 const db = require('../db');
 const Products = require('../products');
-
 const products = require('../data/full-products.json');
 
-;(async () => {
-  // loop over the products and create them
-  for (let i = 0; i < products.length; i++) {
-    console.log( await Products.create(products[i]));
+(async () => {
+  try {
+    console.log('📦 Importing products...');
+
+    for (const product of products) {
+      try {
+        const created = await Products.create(product);
+        console.log('✅ Added:', created._id);
+      } catch (err) {
+        console.error('❌ Failed to import product:', err.message);
+      }
+    }
+
+    console.log('🎉 Import complete');
+    process.exit(0);
+  } catch (err) {
+    console.error('🔥 Fatal import error:', err.message);
+    process.exit(1);
   }
-})()
+})();
