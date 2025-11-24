@@ -9,11 +9,11 @@ function cors(req, res, next) {
 
   // Set the CORS headers
   res.setHeader('Access-Control-Allow-Origin', origin || '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS, XMODIFY')
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS, MODIFY')
   res.setHeader('Access-Control-Allow-Credentials', true)
   res.setHeader('Access-Control-Max-Age', '86400')
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept')
-
+  
   next()
 }
 
@@ -51,3 +51,6 @@ module.exports = {
   handleError,
   notFound
 }
+
+const { logger } = require('./middleware')
+app.use(logger) // only if logger is (req, res, next) => { ... }
