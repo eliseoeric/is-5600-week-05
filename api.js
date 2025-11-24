@@ -1,7 +1,6 @@
 const path = require('path')
 const Products = require('./products')
 const autoCatch = require('./lib/auto-catch')
-
 /**
  * Handle the root route
  * @param {object} req
@@ -10,7 +9,6 @@ const autoCatch = require('./lib/auto-catch')
 function handleRoot(req, res) {
   res.sendFile(path.join(__dirname, '/index.html'));
 }
-
 /**
  * List all products
  * @param {object} req
@@ -28,6 +26,7 @@ async function listProducts(req, res) {
 }
 
 
+
 /**
  * Get a single product
  * @param {object} req
@@ -35,15 +34,12 @@ async function listProducts(req, res) {
  */
 async function getProduct(req, res, next) {
   const { id } = req.params
-
   const product = await Products.get(id)
   if (!product) {
     return next()
   }
-
   return res.json(product)
 }
-
 /**
  * Create a product
  * @param {object} req 
@@ -53,7 +49,6 @@ async function createProduct(req, res) {
   console.log('request body:', req.body)
   res.json(req.body)
 }
-
 /**
  * Edit a product
  * @param {object} req
@@ -61,10 +56,11 @@ async function createProduct(req, res) {
  * @param {function} next
  */
 async function editProduct(req, res, next) {
-  console.log(req.body)
+  const change = req.body
+  
+  const product = await Products.edit(req.params.id, change)
   res.json(req.body)
 }
-
 /**
  * Delete a product
  * @param {*} req 
@@ -74,7 +70,6 @@ async function editProduct(req, res, next) {
 async function deleteProduct(req, res, next) {
   res.json({ success: true })
 }
-
 module.exports = autoCatch({
   handleRoot,
   listProducts,

@@ -24,6 +24,7 @@ async function list(options = {}) {
     .slice(offset, offset + limit) // Slice the products
 }
 
+
 /**
  * Get a single product
  * @param {string} id
