@@ -24,3 +24,24 @@
     { "title": "texture" }
   ]
 }
+{
+  "description": "Test product",
+  "alt_description": "Alt text",
+  "likes": 0,
+  "urls": {
+    "regular": "http://example.com/1",
+    "small": "http://example.com/1-small",
+    "thumb": "http://example.com/1-thumb"
+  },
+  "links": {
+    "self": "http://api.example.com/product/1",
+    "html": "http://example.com/product/1"
+  },
+  "user": {
+    "id": "u1",
+    "first_name": "John",
+    "last_name": "Doe",
+    "username": "johndoe"
+  },
+  "tags": [{ "title": "tag1" }]
+}
