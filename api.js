@@ -1,85 +1,131 @@
-const path = require('path')
+// api.js
+
 const Products = require('./products')
-const autoCatch = require('./lib/auto-catch')
+const Orders = require('./orders')
+
+/* =========================================
+   ROOT
+========================================= */
+
+async function handleRoot(req, res, next) {
+  res.json({ message: "Welcome to the API!" })
+}
+
+/* =========================================
+   PRODUCTS API
+========================================= */
 
 /**
- * Handle the root route
- * @param {object} req
- * @param {object} res
-*/
-function handleRoot(req, res) {
-  res.sendFile(path.join(__dirname, '/index.html'));
+ * Create a new product
+ */
+async function createProduct(req, res, next) {
+  const product = await Products.create(req.body)
+  res.json(product)
 }
 
 /**
- * List all products
- * @param {object} req
- * @param {object} res
+ * List products
  */
-async function listProducts(req, res) {
-  // Extract the limit and offset query parameters
+async function listProducts(req, res, next) {
   const { offset = 0, limit = 25, tag } = req.query
-  // Pass the limit and offset to the Products service
-  res.json(await Products.list({
+
+  const products = await Products.list({
     offset: Number(offset),
     limit: Number(limit),
     tag
-  }))
+  })
+
+  res.json(products)
 }
 
-
 /**
- * Get a single product
- * @param {object} req
- * @param {object} res
+ * Get a product by ID
  */
 async function getProduct(req, res, next) {
-  const { id } = req.params
-
-  const product = await Products.get(id)
-  if (!product) {
-    return next()
-  }
-
-  return res.json(product)
-}
-
-/**
- * Create a product
- * @param {object} req 
- * @param {object} res 
- */
-async function createProduct(req, res) {
-  console.log('request body:', req.body)
-  res.json(req.body)
+  const product = await Products.get(req.params.id)
+  res.json(product)
 }
 
 /**
  * Edit a product
- * @param {object} req
- * @param {object} res
- * @param {function} next
  */
 async function editProduct(req, res, next) {
-  console.log(req.body)
-  res.json(req.body)
+  const updated = await Products.edit(req.params.id, req.body)
+  res.json(updated)
 }
 
 /**
  * Delete a product
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
  */
 async function deleteProduct(req, res, next) {
-  res.json({ success: true })
+  const result = await Products.destroy(req.params.id)
+  res.json(result)
 }
 
-module.exports = autoCatch({
+
+/* =========================================
+   ORDERS API
+========================================= */
+
+/**
+ * Create an order
+ */
+async function createOrder(req, res, next) {
+  const order = await Orders.create(req.body)
+  res.json(order)
+}
+
+/**
+ * List orders
+ */
+async function listOrders(req, res, next) {
+  const { offset = 0, limit = 25, productId, status } = req.query
+
+  const orders = await Orders.list({
+    offset: Number(offset),
+    limit: Number(limit),
+    productId,
+    status
+  })
+
+  res.json(orders)
+}
+
+/**
+ * Edit an order
+ */
+async function editOrder(req, res, next) {
+  const updated = await Orders.edit(req.params.id, req.body)
+  res.json(updated)
+}
+
+/**
+ * Delete an order
+ */
+async function deleteOrder(req, res, next) {
+  await Orders.destroy(req.params.id)
+  res.json({ status: "ok" })
+}
+
+
+/* =========================================
+   EXPORTS
+========================================= */
+
+module.exports = {
+  // root
   handleRoot,
+
+  // products
+  createProduct,
   listProducts,
   getProduct,
-  createProduct,
   editProduct,
-  deleteProduct
-});
+  deleteProduct,
+
+  // orders
+  createOrder,
+  listOrders,
+  editOrder,
+  deleteOrder
+}
