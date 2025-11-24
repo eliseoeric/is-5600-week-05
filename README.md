@@ -111,10 +111,7 @@ So with our mongoose model defined, we can now implement the `Products.create()`
  * @param {Object} product
  * @returns {Promise<Object>}
  */
-async function create (fields) {
-  const product = await new Product(fields).save()
-  return product
-}
+
 ```
 
 What we are doing here is creating the product in memory first using the `new Product(fields)`. Then we are calling the async method `save()` which will persist the product to the database. The `save()` method returns a promise, so we can use the `await` keyword to wait for the promise to resolve. Once the promise resolves, we can return the product.
