@@ -9,7 +9,7 @@ const productsFile = path.join(__dirname, 'data/full-products.json')
  * @param {Object} query
  * @returns {Promise<Object[]>}
  */
-async function list (options = {}) {
+async function list(options = {}) {
   const { offset = 0, limit = 25, tag } = options
 
   // Use a ternary statement to create the query object. Then pass 
@@ -25,7 +25,7 @@ async function list (options = {}) {
     .sort({ _id: 1 })
     .skip(offset)
     .limit(limit)
-    
+
   return products
 }
 
@@ -36,16 +36,10 @@ async function list (options = {}) {
  * @param {String} _id
  * @returns {Promise<Object>}
  */
-async function get (_id) {
+async function get(_id) {
   const product = await Product.findById(_id)
   return product
 }
-module.exports = {
-  list,
-  get
-}
-
-
 
 // products.js
 const cuid = require('cuid')
@@ -76,7 +70,7 @@ const Product = db.model('Product', {
   },
   tags: [{
     title: { type: String, required: true },
-  }], 
+  }],
 })
 
 // products.js
@@ -85,7 +79,7 @@ const Product = db.model('Product', {
  * @param {Object} product
  * @returns {Promise<Object>}
  */
-async function create (fields) {
+async function create(fields) {
   const product = await new Product(fields).save()
   return product
 }
@@ -97,14 +91,14 @@ async function create (fields) {
  * @param {Object} change
  * @returns {Promise<Object>}
  */
-async function edit (_id, change) {
+async function edit(_id, change) {
   const product = await get(_id)
 
   // todo can we use spread operators here?
   Object.keys(change).forEach(function (key) {
     product[key] = change[key]
   })
-  
+
   await product.save()
 
   return product
@@ -115,6 +109,15 @@ async function edit (_id, change) {
  * @param {String} _id
  * @returns {Promise<Object>}
  */
-async function destroy (_id) {
-  return await Product.deleteOne({_id})
+async function destroy(_id) {
+  return await Product.deleteOne({ _id })
+}
+
+
+module.exports = {
+  list,
+  get,
+  create,
+  edit,
+  destroy
 }
