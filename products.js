@@ -47,3 +47,5 @@ module.exports = {
   list,
   get
 }
+const db = require('./db')
+const Product = db.model('Product', { ... })
