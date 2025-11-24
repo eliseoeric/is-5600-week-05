@@ -83,3 +83,21 @@ module.exports = autoCatch({
   editProduct,
   deleteProduct
 });
+async function editOrder(req, res, next) {
+  const order = await Orders.edit(req.params.id, req.body)
+  res.json(order)
+}
+
+async function deleteOrder(req, res, next) {
+  await Orders.destroy(req.params.id)
+  res.json({ success: true })
+}
+module.exports = {
+  listOrders,
+  createOrder,
+  editOrder,
+  deleteOrder,
+  
+}
+
+
