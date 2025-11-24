@@ -1,49 +1,105 @@
-const fs = require('fs').promises
 const path = require('path')
-
-const productsFile = path.join(__dirname, 'data/full-products.json')
+const Products = require('./products')
+const Orders = require('./orders')
+const autoCatch = require('./lib/auto-catch')
 
 /**
- * List products
- * @param {*} options 
- * @returns 
- */
-async function list(options = {}) {
-
-  const { offset = 0, limit = 25, tag } = options;
-
-  const data = await fs.readFile(productsFile)
-  return JSON.parse(data)
-    .filter(product => {
-      if (!tag) {
-        return product
-      }
-
-      return product.tags.find(({ title }) => title == tag)
-    })
-    .slice(offset, offset + limit) // Slice the products
+ * Handle the root route
+ * @param {object} req
+ * @param {object} res
+*/
+function handleRoot(req, res) {
+  res.sendFile(path.join(__dirname, '/index.html'));
 }
+
+/**
+ * List all products
+ * @param {object} req
+ * @param {object} res
+ */
+async function listProducts(req, res) {
+  // Extract the limit and offset query parameters
+  const { offset = 0, limit = 25, tag } = req.query
+  // Pass the limit and offset to the Products service
+  res.json(await Products.list({
+    offset: Number(offset),
+    limit: Number(limit),
+    tag
+  }))
+}
+
 
 /**
  * Get a single product
- * @param {string} id
- * @returns {Promise<object>}
+ * @param {object} req
+ * @param {object} res
  */
-async function get(id) {
-  const products = JSON.parse(await fs.readFile(productsFile))
+async function getProduct(req, res, next) {
+  const { id } = req.params
 
-  // Loop through the products and return the product with the matching id
-  for (let i = 0; i < products.length; i++) {
-    if (products[i].id === id) {
-      return products[i]
-    }
+  const product = await Products.get(id)
+  if (!product) {
+    return next()
   }
 
-  // If no product is found, return null
-  return null;
+  return res.json(product)
 }
 
-module.exports = {
-  list,
-  get
+/**
+ * Create a product
+ * @param {object} req 
+ * @param {object} res 
+ */
+const product = await Products.create(req.body)
+  res.json(product)
 }
+
+/async function editProduct (req, res, next) {
+  const change = req.body
+  const product = await Products.edit(req.params.id, change)
+  res.json(product)
+/**
+ * Delete a product
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+async function deleteProduct (req, res, next) {
+  const response = await Products.destroy(req.params.id)
+  res.json(response)
+}
+
+async function createOrder (req, res, next) {
+  const order = await Orders.create(req.body)
+  res.json(order)
+}
+
+async function editOrder (req, res, next) {
+  const change = req.body
+  const order = await Orders.edit(req.params.id, change)
+  res.json(order)
+}
+
+async function deleteOrder (req, res, next) {
+  const order = await Orders.destroy(req.params.id)
+  res.json(order)
+}
+
+async function listOrders (req, res, next) {
+  const { offset = 0, limit = 25, productId, status } = req.query
+
+  const orders = await Orders.list({ 
+    offset: Number(offset), 
+    limit: Number(limit),
+    productId, 
+    status 
+  })
+
+  res.json(orders)
+ deleteProduct,
+  createOrder,
+  listOrders,
+  editOrder,
+  deleteOrder
+
+});
