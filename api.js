@@ -17,16 +17,14 @@ function handleRoot(req, res) {
  * @param {object} res
  */
 async function listProducts(req, res) {
-  // Extract the limit and offset query parameters
   const { offset = 0, limit = 25, tag } = req.query
-  // Pass the limit and offset to the Products service
-  res.json(await Products.list({
+  const products = await Products.list({
     offset: Number(offset),
     limit: Number(limit),
     tag
-  }))
+  })
+  res.json(products)
 }
-
 
 /**
  * Get a single product
@@ -35,8 +33,8 @@ async function listProducts(req, res) {
  */
 async function getProduct(req, res, next) {
   const { id } = req.params
-
   const product = await Products.get(id)
+
   if (!product) {
     return next()
   }
@@ -50,19 +48,25 @@ async function getProduct(req, res, next) {
  * @param {object} res 
  */
 async function createProduct(req, res) {
-  console.log('request body:', req.body)
-  res.json(req.body)
+  const created = await Products.create(req.body)
+  res.status(201).json(created)
 }
 
 /**
  * Edit a product
- * @param {object} req
- * @param {object} res
- * @param {function} next
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
  */
 async function editProduct(req, res, next) {
-  console.log(req.body)
-  res.json(req.body)
+  const { id } = req.params
+  const updated = await Products.update(id, req.body)
+
+  if (!updated) {
+    return next()
+  }
+
+  res.json(updated)
 }
 
 /**
@@ -72,6 +76,13 @@ async function editProduct(req, res, next) {
  * @param {*} next 
  */
 async function deleteProduct(req, res, next) {
+  const { id } = req.params
+  const removed = await Products.remove(id)
+
+  if (!removed) {
+    return next()
+  }
+
   res.json({ success: true })
 }
 
