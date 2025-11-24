@@ -1,24 +1,33 @@
-const express = require('express')
-const api = require('./api')
-const middleware = require('./middleware')
-const bodyParser = require('body-parser')
+import express from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 
+// Load .env file
+dotenv.config();
 
-// Set the port
-const port = process.env.PORT || 3000
-// Boot the app
-const app = express()
-// Register the public directory
-app.use(express.static(__dirname + '/public'));
-// register the routes
-app.use(bodyParser.json())
-app.use(middleware.cors)
-app.get('/', api.handleRoot)
-app.get('/products', api.listProducts)
-app.get('/products/:id', api.getProduct)
-app.put('/products/:id', api.editProduct)
-app.delete('/products/:id', api.deleteProduct)
-app.post('/products', api.createProduct)
-// Boot the server
-app.listen(port, () => console.log(`Server listening on port ${port}`))
+// Create Express app
+const app = express();
+app.use(express.json());
 
+// ------------------
+// CONNECT TO MONGODB
+// ------------------
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.log("MongoDB connection error:", err));
+
+// ------------------
+// ROUTES
+// ------------------
+import productsRouter from "./products.js";  // If your file is in routes folder, use "./routes/products.js"
+app.use("/products", productsRouter);
+
+// ------------------
+// START SERVER
+// ------------------
+const PORT = process.env.PORT || 4000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

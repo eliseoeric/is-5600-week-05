@@ -1,49 +1,57 @@
-const fs = require('fs').promises
-const path = require('path')
+import express from "express";
+import Product from "./models/productModel.js";
 
-const productsFile = path.join(__dirname, 'data/full-products.json')
+const router = express.Router();
 
-/**
- * List products
- * @param {*} options 
- * @returns 
- */
-async function list(options = {}) {
+// CREATE (POST)
+router.post("/", async (req, res) => {
+  try {
+    const newProduct = await Product.create(req.body);
+    res.status(201).json(newProduct);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
 
-  const { offset = 0, limit = 25, tag } = options;
+// READ ALL (GET)
+router.get("/", async (req, res) => {
+  const products = await Product.find();
+  res.json(products);
+});
 
-  const data = await fs.readFile(productsFile)
-  return JSON.parse(data)
-    .filter(product => {
-      if (!tag) {
-        return product
-      }
+// READ ONE (GET /:id)
+router.get("/:id", async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+  res.json(product);
+});
 
-      return product.tags.find(({ title }) => title == tag)
-    })
-    .slice(offset, offset + limit) // Slice the products
-}
+// UPDATE (PUT /:id)
+router.put("/:id", async (req, res) => {
+  const updatedProduct = await Product.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true }
+  );
 
-/**
- * Get a single product
- * @param {string} id
- * @returns {Promise<object>}
- */
-async function get(id) {
-  const products = JSON.parse(await fs.readFile(productsFile))
-
-  // Loop through the products and return the product with the matching id
-  for (let i = 0; i < products.length; i++) {
-    if (products[i].id === id) {
-      return products[i]
-    }
+  if (!updatedProduct) {
+    return res.status(404).json({ message: "Product not found" });
   }
 
-  // If no product is found, return null
-  return null;
-}
+  res.json(updatedProduct);
+});
 
-module.exports = {
-  list,
-  get
-}
+// DELETE (DELETE /:id)
+router.delete("/:id", async (req, res) => {
+  const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+
+  if (!deletedProduct) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+
+  res.json({ message: "Product deleted successfully" });
+});
+
+export default router;
