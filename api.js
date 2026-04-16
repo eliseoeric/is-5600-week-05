@@ -1,6 +1,7 @@
 const path = require('path')
 const Products = require('./products')
 const autoCatch = require('./lib/auto-catch')
+const Orders = require('./orders')
 
 /**
  * Handle the root route
@@ -26,7 +27,23 @@ async function listProducts(req, res) {
     tag
   }))
 }
+async function listOrders(req, res, next) {
+  const { offset = 0, limit = 25, productId, status } = req.query
 
+  const orders = await Orders.list({
+    offset: Number(offset),
+    limit: Number(limit),
+    productId,
+    status
+  })
+
+  res.json(orders)
+}
+
+async function getOrder(req, res, next) {
+  const order = await Orders.get(req.params.id)
+  res.json(order)
+}
 
 /**
  * Get a single product
@@ -49,9 +66,9 @@ async function getProduct(req, res, next) {
  * @param {object} req 
  * @param {object} res 
  */
-async function createProduct(req, res) {
-  console.log('request body:', req.body)
-  res.json(req.body)
+async function createProduct (req, res, next) {
+  const product = await Products.create(req.body)
+  res.json(product)
 }
 
 /**
@@ -63,6 +80,17 @@ async function createProduct(req, res) {
 async function editProduct(req, res, next) {
   console.log(req.body)
   res.json(req.body)
+}
+
+async function editOrder(req, res, next) {
+  const change = req.body
+  const order = await Orders.edit(req.params.id, change)
+  res.json(order)
+}
+
+async function deleteOrder(req, res, next) {
+  await Orders.destroy(req.params.id)
+  res.json({ success: true })
 }
 
 /**
@@ -81,5 +109,9 @@ module.exports = autoCatch({
   getProduct,
   createProduct,
   editProduct,
-  deleteProduct
-});
+  deleteProduct,
+  listOrders,
+  getOrder,
+  editOrder,
+  deleteOrder,
+})
