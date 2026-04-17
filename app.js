@@ -1,8 +1,19 @@
-const express = require('express')
-const api = require('./api')
-const middleware = require('./middleware')
-const bodyParser = require('body-parser')
+const dotenv = require('dotenv');
+dotenv.config();
 
+console.log("MONGO_URI =", process.env.MONGO_URI);
+
+const mongoose = require('mongoose');
+const express = require('express');
+const api = require('./api');
+const middleware = require('./middleware');
+const bodyParser = require('body-parser');
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => {
+    console.log("MongoDB Connection Error:");
+    console.log(err.message);
+  });
 
 // Set the port
 const port = process.env.PORT || 3000
