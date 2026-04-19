@@ -1,24 +1,31 @@
-const express = require('express')
-const api = require('./api')
-const middleware = require('./middleware')
-const bodyParser = require('body-parser')
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 
+// IMPORTANT: this connects MongoDB
+require('./db');
 
-// Set the port
-const port = process.env.PORT || 3000
-// Boot the app
-const app = express()
-// Register the public directory
+// your existing api file
+const api = require('./api');
+
+const app = express();
+const port = process.env.PORT || 3000;
+
 app.use(express.static(__dirname + '/public'));
-// register the routes
-app.use(bodyParser.json())
-app.use(middleware.cors)
-app.get('/', api.handleRoot)
-app.get('/products', api.listProducts)
-app.get('/products/:id', api.getProduct)
-app.put('/products/:id', api.editProduct)
-app.delete('/products/:id', api.deleteProduct)
-app.post('/products', api.createProduct)
-// Boot the server
-app.listen(port, () => console.log(`Server listening on port ${port}`))
+app.use(bodyParser.json());
+app.use(cors());
 
+// routes (use your existing api.js functions)
+app.get('/', (req, res) => {
+  res.send('Server is working');
+});
+
+app.get('/products', api.listProducts);
+app.get('/products/:id', api.getProduct);
+app.post('/products', api.createProduct);
+app.put('/products/:id', api.editProduct);
+app.delete('/products/:id', api.deleteProduct);
+
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
