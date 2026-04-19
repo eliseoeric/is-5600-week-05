@@ -1,5 +1,6 @@
 const path = require('path')
 const Products = require('./products')
+const Orders = require('./orders')
 const autoCatch = require('./lib/auto-catch')
 
 /**
@@ -50,8 +51,8 @@ async function getProduct(req, res, next) {
  * @param {object} res 
  */
 async function createProduct(req, res) {
-  console.log('request body:', req.body)
-  res.json(req.body)
+  const product = await Products.create(req.body);
+  res.json(product);
 }
 
 /**
@@ -61,8 +62,12 @@ async function createProduct(req, res) {
  * @param {function} next
  */
 async function editProduct(req, res, next) {
-  console.log(req.body)
-  res.json(req.body)
+  const { id } = req.params;
+  const product = await Products.edit(id, req.body);
+  if (!product) {
+    return next();
+  }
+  res.json(product);
 }
 
 /**
@@ -72,7 +77,80 @@ async function editProduct(req, res, next) {
  * @param {*} next 
  */
 async function deleteProduct(req, res, next) {
-  res.json({ success: true })
+  const { id } = req.params;
+  const product = await Products.remove(id);
+  if (!product) {
+    return next();
+  }
+  res.json({ success: true });
+}
+
+/**
+ * List all orders
+ * @param {object} req
+ * @param {object} res
+ */
+async function listOrders(req, res) {
+  const { offset = 0, limit = 25 } = req.query;
+  res.json(await Orders.list({
+    offset: Number(offset),
+    limit: Number(limit)
+  }));
+}
+
+/**
+ * Get a single order
+ * @param {object} req
+ * @param {object} res
+ * @param {function} next
+ */
+async function getOrder(req, res, next) {
+  const { id } = req.params;
+  const order = await Orders.get(id);
+  if (!order) {
+    return next();
+  }
+  res.json(order);
+}
+
+/**
+ * Create an order
+ * @param {object} req
+ * @param {object} res
+ */
+async function createOrder(req, res) {
+  const order = await Orders.create(req.body);
+  res.json(order);
+}
+
+/**
+ * Edit an order
+ * @param {object} req
+ * @param {object} res
+ * @param {function} next
+ */
+async function editOrder(req, res, next) {
+  const { id } = req.params;
+  const order = await Orders.edit(id, req.body);
+  if (!order) {
+    return next();
+  }
+  res.json(order);
+}
+
+/**
+ * Delete an order
+ * @param {object} req
+ * @param {object} res
+ * @param {function} next
+ */
+async function deleteOrder(req, res, next) {
+  const { id } = req.params;
+  const order = await Orders.remove(id);
+  if (!order) {
+    return next();
+  }
+  res.json({ success: true });
 }
 
 module.exports = autoCatch({
@@ -81,5 +159,10 @@ module.exports = autoCatch({
   getProduct,
   createProduct,
   editProduct,
-  deleteProduct
+  deleteProduct,
+  listOrders,
+  getOrder,
+  createOrder,
+  editOrder,
+  deleteOrder
 });

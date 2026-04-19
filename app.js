@@ -3,6 +3,9 @@ const api = require('./api')
 const middleware = require('./middleware')
 const bodyParser = require('body-parser')
 
+// Connect to MongoDB
+const connectDB = require('./db');
+connectDB();
 
 // Set the port
 const port = process.env.PORT || 3000
@@ -19,6 +22,11 @@ app.get('/products/:id', api.getProduct)
 app.put('/products/:id', api.editProduct)
 app.delete('/products/:id', api.deleteProduct)
 app.post('/products', api.createProduct)
+app.get('/orders', api.listOrders)
+app.get('/orders/:id', api.getOrder)
+app.put('/orders/:id', api.editOrder)
+app.delete('/orders/:id', api.deleteOrder)
+app.post('/orders', api.createOrder)
 // Boot the server
-app.listen(port, () => console.log(`Server listening on port ${port}`))
+app.listen(port, '0.0.0.0', () => console.log(`Server listening on port ${port}`))
 
