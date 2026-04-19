@@ -1,14 +1,16 @@
 const path = require('path')
+
 const Products = require('./products')
+
 const autoCatch = require('./lib/auto-catch')
 
 /**
  * Handle the root route
  * @param {object} req
  * @param {object} res
-*/
+ */
 function handleRoot(req, res) {
-  res.sendFile(path.join(__dirname, '/index.html'));
+  res.sendFile(path.join(__dirname, '/index.html'))
 }
 
 /**
@@ -17,9 +19,8 @@ function handleRoot(req, res) {
  * @param {object} res
  */
 async function listProducts(req, res) {
-  // Extract the limit and offset query parameters
   const { offset = 0, limit = 25, tag } = req.query
-  // Pass the limit and offset to the Products service
+
   res.json(await Products.list({
     offset: Number(offset),
     limit: Number(limit),
@@ -27,16 +28,16 @@ async function listProducts(req, res) {
   }))
 }
 
-
 /**
  * Get a single product
  * @param {object} req
  * @param {object} res
+ * @param {function} next
  */
 async function getProduct(req, res, next) {
   const { id } = req.params
-
   const product = await Products.get(id)
+
   if (!product) {
     return next()
   }
@@ -45,34 +46,32 @@ async function getProduct(req, res, next) {
 }
 
 /**
- * Create a product
- * @param {object} req 
- * @param {object} res 
+ * Create a new product
+ * @param {object} req
+ * @param {object} res
+ * @param {function} next
  */
-async function createProduct(req, res) {
-  console.log('request body:', req.body)
-  res.json(req.body)
+async function createProduct(req, res, next) {
+  const product = await Products.create(req.body)
+  res.json(product)
 }
 
 /**
  * Edit a product
  * @param {object} req
  * @param {object} res
- * @param {function} next
  */
-async function editProduct(req, res, next) {
-  console.log(req.body)
-  res.json(req.body)
+async function editProduct(req, res) {
+  res.json({ ok: true, message: 'Edit product route not implemented in this lab.' })
 }
 
 /**
  * Delete a product
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
+ * @param {object} req
+ * @param {object} res
  */
-async function deleteProduct(req, res, next) {
-  res.json({ success: true })
+async function deleteProduct(req, res) {
+  res.json({ ok: true, message: 'Delete product route not implemented in this lab.' })
 }
 
 module.exports = autoCatch({
@@ -82,4 +81,4 @@ module.exports = autoCatch({
   createProduct,
   editProduct,
   deleteProduct
-});
+})
