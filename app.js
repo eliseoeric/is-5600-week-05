@@ -22,3 +22,20 @@ app.post('/products', api.createProduct)
 // Boot the server
 app.listen(port, () => console.log(`Server listening on port ${port}`))
 
+/**
+ * Create a new product
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ */
+async function createProduct (req, res, next) {
+  const product = await Products.create(req.body)
+  res.json(product)
+}
+
+// app.js
+
+// ...
+
+app.get('/orders', api.listOrders)
+app.get('/orders/', api.createOrder)
