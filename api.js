@@ -1,85 +1,54 @@
-const path = require('path')
-const Products = require('./products')
-const autoCatch = require('./lib/auto-catch')
+let products = [];
+let idCounter = 1;
 
-/**
- * Handle the root route
- * @param {object} req
- * @param {object} res
-*/
-function handleRoot(req, res) {
-  res.sendFile(path.join(__dirname, '/index.html'));
-}
+// Root
+exports.handleRoot = (req, res) => {
+  res.send("Welcome to Products API");
+};
 
-/**
- * List all products
- * @param {object} req
- * @param {object} res
- */
-async function listProducts(req, res) {
-  // Extract the limit and offset query parameters
-  const { offset = 0, limit = 25, tag } = req.query
-  // Pass the limit and offset to the Products service
-  res.json(await Products.list({
-    offset: Number(offset),
-    limit: Number(limit),
-    tag
-  }))
-}
+// GET all products
+exports.listProducts = (req, res) => {
+  res.json(products);
+};
 
+// GET single product
+exports.getProduct = (req, res) => {
+  const product = products.find(p => p.id == req.params.id);
+  if (!product) return res.status(404).json({ error: "Not found" });
+  res.json(product);
+};
 
-/**
- * Get a single product
- * @param {object} req
- * @param {object} res
- */
-async function getProduct(req, res, next) {
-  const { id } = req.params
+// CREATE product
+exports.createProduct = (req, res) => {
+  const newProduct = {
+    id: idCounter++,
+    name: req.body.name,
+    price: req.body.price,
+    description: req.body.description || ""
+  };
 
-  const product = await Products.get(id)
-  if (!product) {
-    return next()
+  products.push(newProduct);
+  res.status(201).json(newProduct);
+};
+
+// UPDATE product
+exports.editProduct = (req, res) => {
+  const index = products.findIndex(p => p.id == req.params.id);
+
+  if (index === -1) {
+    return res.status(404).json({ error: "Not found" });
   }
 
-  return res.json(product)
-}
+  products[index] = {
+    ...products[index],
+    ...req.body
+  };
 
-/**
- * Create a product
- * @param {object} req 
- * @param {object} res 
- */
-async function createProduct(req, res) {
-  console.log('request body:', req.body)
-  res.json(req.body)
-}
+  res.json(products[index]);
+};
 
-/**
- * Edit a product
- * @param {object} req
- * @param {object} res
- * @param {function} next
- */
-async function editProduct(req, res, next) {
-  console.log(req.body)
-  res.json(req.body)
-}
-
-/**
- * Delete a product
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
- */
-async function deleteProduct(req, res, next) {
-  res.json({ success: true })
-}
-
-module.exports = autoCatch({
-  handleRoot,
-  listProducts,
-  getProduct,
-  createProduct,
-  editProduct,
-  deleteProduct
-});
+// DELETE product
+exports.deleteProduct = (req, res) => {
+  products = products.filter(p => p.id != req.params.id);
+  res.json({ message: "Deleted" });
+};
