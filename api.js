@@ -1,85 +1,51 @@
 const path = require('path')
-const Products = require('./products')
-const autoCatch = require('./lib/auto-catch')
+const express = require('express')
+const mongoose = require('mongoose')
 
-/**
- * Handle the root route
- * @param {object} req
- * @param {object} res
-*/
-function handleRoot(req, res) {
-  res.sendFile(path.join(__dirname, '/index.html'));
-}
+const app = express()
+app.use(express.json())
 
-/**
- * List all products
- * @param {object} req
- * @param {object} res
- */
-async function listProducts(req, res) {
-  // Extract the limit and offset query parameters
-  const { offset = 0, limit = 25, tag } = req.query
-  // Pass the limit and offset to the Products service
-  res.json(await Products.list({
-    offset: Number(offset),
-    limit: Number(limit),
-    tag
-  }))
-}
+// ================= DATABASE CONNECTION =================
+// 🔴 REPLACE WITH YOUR OWN ATLAS CONNECTION STRING
+mongoose.connect("mongodb+srv://kotimanda321_db_user:<db_password>@cluster0.p2swzse.mongodb.net/?appName=Cluster0")
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.log(err))
 
+// ================= MODEL =================
+const productSchema = new mongoose.Schema({
+  name: String,
+  price: Number,
+  description: String
+})
 
-/**
- * Get a single product
- * @param {object} req
- * @param {object} res
- */
-async function getProduct(req, res, next) {
-  const { id } = req.params
+const Product = mongoose.model("Product", productSchema)
 
-  const product = await Products.get(id)
-  if (!product) {
-    return next()
+// ================= ROUTES =================
+
+// HOME ROUTE
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '/index.html'))
+})
+
+// GET ALL PRODUCTS
+app.get('/products', async (req, res) => {
+  try {
+    const products = await Product.find()
+    res.json(products)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
   }
+})
 
-  return res.json(product)
-}
+// CREATE PRODUCT
+app.post('/products', async (req, res) => {
+  try {
+    const product = new Product(req.body)
+    await product.save()
+    res.json(product)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
 
-/**
- * Create a product
- * @param {object} req 
- * @param {object} res 
- */
-async function createProduct(req, res) {
-  console.log('request body:', req.body)
-  res.json(req.body)
-}
-
-/**
- * Edit a product
- * @param {object} req
- * @param {object} res
- * @param {function} next
- */
-async function editProduct(req, res, next) {
-  console.log(req.body)
-  res.json(req.body)
-}
-
-/**
- * Delete a product
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
- */
-async function deleteProduct(req, res, next) {
-  res.json({ success: true })
-}
-
-module.exports = autoCatch({
-  handleRoot,
-  listProducts,
-  getProduct,
-  createProduct,
-  editProduct,
-  deleteProduct
-});
+module.exports = app
