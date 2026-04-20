@@ -1,24 +1,19 @@
-const express = require('express')
-const api = require('./api')
-const middleware = require('./middleware')
-const bodyParser = require('body-parser')
+// db.js
+const mongoose = require('mongoose')
 
+const DEFAULT_URI =
+  'mongodb://root:example@127.0.0.1:27017/is5600-week05?authSource=admin'
+// prefer env if you’re using Atlas or a custom container
+const MONGODB_URI = process.env.MONGODB_URI || DEFAULT_URI
 
-// Set the port
-const port = process.env.PORT || 3000
-// Boot the app
-const app = express()
-// Register the public directory
-app.use(express.static(__dirname + '/public'));
-// register the routes
-app.use(bodyParser.json())
-app.use(middleware.cors)
-app.get('/', api.handleRoot)
-app.get('/products', api.listProducts)
-app.get('/products/:id', api.getProduct)
-app.put('/products/:id', api.editProduct)
-app.delete('/products/:id', api.deleteProduct)
-app.post('/products', api.createProduct)
-// Boot the server
-app.listen(port, () => console.log(`Server listening on port ${port}`))
+mongoose
+  .connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log('[mongo] connected'))
+  .catch((err) => {
+    console.error('[mongo] connection error:', err.message)
+  })
 
+module.exports = mongoose
