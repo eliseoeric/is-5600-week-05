@@ -1,53 +1,24 @@
-/**
- * Set the CORS headers on the response object
- * @param {object} req
- * @param {object} res
- * @param {function} next
- */
-function cors(req, res, next) {
-  const origin = req.headers.origin
-
-  // Set the CORS headers
-  res.setHeader('Access-Control-Allow-Origin', origin || '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS, XMODIFY')
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Max-Age', '86400')
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept')
-
+function cors (req, res, next) {
+  const origin = req.get('Origin')
+  res.set('Access-Control-Allow-Origin', origin || '*')
+  if (origin) {
+    res.vary('Origin')
+    res.set('Access-Control-Allow-Credentials', 'true')
+  }
+  res.set('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+  res.set('Access-Control-Allow-Headers', 'Content-Type,Accept,X-Requested-With')
+  if (req.method === 'OPTIONS') return res.status(204).end()
   next()
 }
-
-/**
- * Handle errors
- * @param {object} err
- * @param {object} req
- * @param {object} res
- * @param {function} next
- */
-function handleError(err, req, res, next) {
-  // Log the error to our server's console
-  console.error(err)
-
-  // If the response has already been sent, we can't send another response
-  if (res.headersSent) {
-    return next(err)
-  }
-
-  // Send a 500 error response
-  res.status(500).json({ error: "Internal Error Occurred" })
+function notFound (req, res) { res.status(404).json({ error: 'Not Found' }) }
+function handleError (err, req, res, next) {
+  if (res.headersSent) return next(err)
+  let status = err.status || 500
+  if (['ValidationError', 'CastError', 'StrictModeError'].includes(err.name)) status = 400
+  if (err.code === 11000) status = 409
+  const message = status === 500 ? 'Internal Error Occurred' :
+    status === 409 ? 'A record with that ID already exists' : err.message
+  if (status === 500) console.error(err)
+  res.status(status).json({ error: message })
 }
-
-/**
- * Send a 404 response if no route is found
- * @param {object} req
- * @param {object} res
- */
-function notFound(req, res) {
-  res.status(404).json({ error: "Not Found" })
-}
-
-module.exports = {
-  cors,
-  handleError,
-  notFound
-}
+module.exports = { cors, notFound, handleError }

@@ -1,0 +1,242 @@
+{
+  "info": {
+    "name": "Lab 05 Fullstack Prints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Create product",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/products",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"blood vein texture\",\n  \"alt_description\": null,\n  \"likes\": 764,\n  \"urls\": {\n    \"raw\": \"https://images.unsplash.com/photo-1524721696987-b9527df9e512?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjY0MjAxfQ\",\n    \"full\": \"https://images.unsplash.com/photo-1524721696987-b9527df9e512?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjY0MjAxfQ\",\n    \"regular\": \"https://images.unsplash.com/photo-1524721696987-b9527df9e512?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjY0MjAxfQ\",\n    \"small\": \"https://images.unsplash.com/photo-1524721696987-b9527df9e512?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=400&fit=max&ixid=eyJhcHBfaWQiOjY0MjAxfQ\",\n    \"thumb\": \"https://images.unsplash.com/photo-1524721696987-b9527df9e512?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjY0MjAxfQ\"\n  },\n  \"links\": {\n    \"self\": \"https://api.unsplash.com/photos/lhnOvu72BM8\",\n    \"html\": \"https://unsplash.com/photos/lhnOvu72BM8\",\n    \"download\": \"https://unsplash.com/photos/lhnOvu72BM8/download\",\n    \"download_location\": \"https://api.unsplash.com/photos/lhnOvu72BM8/download\"\n  },\n  \"user\": {\n    \"id\": \"F5X7nTnxKBk\",\n    \"updated_at\": \"2019-03-22T06:54:10-04:00\",\n    \"username\": \"cassi_josh\",\n    \"name\": \"Cassi Josh\",\n    \"first_name\": \"Cassi\",\n    \"last_name\": \"Josh\",\n    \"twitter_username\": null,\n    \"portfolio_url\": null,\n    \"bio\": null,\n    \"location\": \"chennai\",\n    \"links\": {\n      \"self\": \"https://api.unsplash.com/users/cassi_josh\",\n      \"html\": \"https://unsplash.com/@cassi_josh\",\n      \"photos\": \"https://api.unsplash.com/users/cassi_josh/photos\",\n      \"likes\": \"https://api.unsplash.com/users/cassi_josh/likes\",\n      \"portfolio\": \"https://api.unsplash.com/users/cassi_josh/portfolio\",\n      \"following\": \"https://api.unsplash.com/users/cassi_josh/following\",\n      \"followers\": \"https://api.unsplash.com/users/cassi_josh/followers\"\n    },\n    \"profile_image\": {\n      \"small\": \"https://images.unsplash.com/profile-1525704040658-b6b59e4bb353?ixlib=rb-1.2.1&q=80&fm=jpg&crop=faces&cs=tinysrgb&fit=crop&h=32&w=32\",\n      \"medium\": \"https://images.unsplash.com/profile-1525704040658-b6b59e4bb353?ixlib=rb-1.2.1&q=80&fm=jpg&crop=faces&cs=tinysrgb&fit=crop&h=64&w=64\",\n      \"large\": \"https://images.unsplash.com/profile-1525704040658-b6b59e4bb353?ixlib=rb-1.2.1&q=80&fm=jpg&crop=faces&cs=tinysrgb&fit=crop&h=128&w=128\"\n    },\n    \"instagram_username\": null,\n    \"total_collections\": 0,\n    \"total_likes\": 0,\n    \"total_photos\": 7,\n    \"accepted_tos\": false\n  },\n  \"tags\": [\n    {\n      \"title\": \"marble\"\n    },\n    {\n      \"title\": \"texture\"\n    },\n    {\n      \"title\": \"red\"\n    },\n    {\n      \"title\": \"black\"\n    },\n    {\n      \"title\": \"blood\"\n    },\n    {\n      \"title\": \"closeup\"\n    },\n    {\n      \"title\": \"detail\"\n    },\n    {\n      \"title\": \"macro\"\n    }\n  ]\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP status\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"productId\", pm.response.json()._id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/products?offset=0&limit=3&tag=texture"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP status\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get product",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/products/{{productId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP status\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Edit product",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/products/{{productId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"likes\": 25\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP status\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create order",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/orders",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"buyerEmail\": \"student@example.com\",\n  \"products\": [\n    \"{{productId}}\"\n  ]\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP status\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"orderId\", pm.response.json()._id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Filter orders",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/orders?productId={{productId}}&status=CREATED"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP status\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get populated order",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/orders/{{orderId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP status\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Edit order",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/orders/{{orderId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"COMPLETED\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP status\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delete order",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/orders/{{orderId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP status\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delete product",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/products/{{productId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Expected HTTP status\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
