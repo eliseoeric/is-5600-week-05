@@ -332,3 +332,8 @@ ASALocalRun/
 *.DS_Store
 
 out
+.env
+.env.*
+!.env.example
+
+.mongo-test-*/
